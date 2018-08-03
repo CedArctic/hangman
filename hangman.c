@@ -98,7 +98,7 @@ int main()
 
         printf("\n\n\n\n%s", stars);			//Print the stars string (i.e: h*ll* for hello).
 
-		printf("\n\nGuess a letter:");		//Have the user guess a letter.
+	printf("\n\nGuess a letter:");			//Have the user guess a letter.
         scanf(" %c",&ch);
 
         for(i=0; i<len; i++)            		//Run through the string checking the characters.
