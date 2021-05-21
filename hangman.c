@@ -1,11 +1,30 @@
 #include <stdio.h>
 #include <string.h>
-#include <conio.h>
 
 void clrscr()				//A function to clear the terminal/cmd window.
 {
     system("@cls||clear");
 }
+
+char equalsignorecase(char char1, char char2) { //Returns 1 if the characters are equal, ignoring case.
+    if ('Z'-char1 == 'Z'-char2 || 'z'-char1 == 'Z'-char2 || 'Z'-char1 == 'z'-char2) { //Chars are also integers and the letters of the alphabet are next to eachother. We can compare the chars using their numeric value.
+        return 1;
+    }
+    return 0;
+}
+
+void print_wrong_letters(int guesses, char wrong_letters[]) { //It is nice if the user knows what it has already guessed.
+    printf("Wrong letters: "); //Say "wrong numbers" without \n so that the next message is on the same line.
+    if (guesses) { //If there are any guesses, list them.
+        for (int letter_index = 0; letter_index < guesses; letter_index ++) { //Loop through the wrong guesses.
+            printf("%c  ", wrong_letters[letter_index]); //Print the wrong guesses.
+        }
+    } else { //If there aren't any wrong guesses, just say "None" to make it clear to the user.
+        printf("None");
+    }
+    printf("\n"); //End with a newline.
+}
+
 
 void hangman(int i){			//A function that prints the hanged man ascii art according to how many wrong guesses the user has made.
         clrscr();           		//Command to clear screen, if it doesn't work, use the commented line bellow.
@@ -38,6 +57,7 @@ int main()
 {
     char word[20];			//Used to store the user word. Most words are less than 20 characters so the default size is 20.
     char stars[20];			//A string full of * that are replaced upon the user entering the right letter of the word.
+    char wrong_guesses[6];     //Show the user the letters they got wrong.
     int counter = 0;			//A counter to use in the for loops.
     int len;				//len is the length of the word entered.
     char ch;				//ch is a temporary character variable.
@@ -58,9 +78,8 @@ int main()
 
 
     printf("\n\nEnter a word:");			//Ask the user to enter a word.
-    scanf("%s", &word);
+    scanf("%20s", &word);
     len = strlen(word);					//Make len equal to the length of the word.
-
 
     clrscr();						//To clear the screen, if function doesn't work properly, use the commented line bellow instead.
     /*printf(" \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n");*/
@@ -79,14 +98,6 @@ int main()
     //Enter main program loop where guessing and checking happens. 26 is for 20 maximum characters + 6 strike characters.
     for(counter = 0; counter<26; counter++)
     {
-
-        if(wincounter==len)			    	//If the number of correct guesses matches the length of the word it means that the user won.
-        {
-            printf("\n\nThe word was: %s\n", word);
-            printf("\nYou win!\n");
-            break;
-        }
-
         hangman(strikes);			    	//Print the hangman ascii art according to how many wrong guesses the user has made.
 
         if(strikes==6)				    	//If the user makes 6 wrong guesses it means that he lost.
@@ -96,14 +107,23 @@ int main()
             break;
         }
 
-        printf("\n\n\n\n%s", stars);			//Print the stars string (i.e: h*ll* for hello).
+        printf("\n\n\n");
+        print_wrong_letters(strikes, wrong_guesses);
+        printf("\n\n%s", stars);			//Print the stars string (i.e: h*ll* for hello).
+
+        if(wincounter==len)			    	//If the number of correct guesses matches the length of the word it means that the user won.
+        {
+            printf("\n\nThe word was: %s\n", word);
+            printf("\nYou win!\n");
+            break;
+        }
 
 	printf("\n\nGuess a letter:");			//Have the user guess a letter.
         scanf(" %c",&ch);
 
         for(i=0; i<len; i++)            		//Run through the string checking the characters.
         {
-            if(word[i]==ch)
+            if(equalsignorecase(word[i], ch)) //Check if the guess is correct.
             {
                 stars[i]=ch;		    		//If the guess is correct, replace it in the stars string.
                 trigger++;			   	//If a character the user entered matches one of the initial word, change the trigger to a non zero value.
@@ -113,13 +133,16 @@ int main()
 
         if(trigger==0)
         {
+            wrong_guesses[strikes] = ch;    //If the guess is not correct, add the character to the wrong guesses.
             strikes++;				    	//If the trigger is not a non zero value, increase the strikes counter because that means that the user input character didn't match any character of the word.
         }
 
         trigger = 0;				    	//Set the trigger to 0 again so the user can guess a new character.
     }
-
-    printf("\nPress any key to exit.");
-    while (!kbhit()){};                 		//Wait for user to hit a key. This is done to keep results on-screen and not close the terminal/cmd window right away.
+    printf("\nPress Enter to exit.");
+    fflush(stdin);
+    while(getchar()!='\n');
+    getchar(); // wait for ENTER
+    
     return 0;
 }
